@@ -1,0 +1,34 @@
+name: Actualizador de Canales Automático
+
+on:
+  schedule:
+    # Se ejecuta de forma automática cada 6 horas
+    - cron: '0 */6 * * *'
+  workflow_dispatch: # Esto te permite activarlo manualmente cuando quieras
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Clonar el repositorio
+      uses: actions/checkout@v3
+
+    - name: Configurar Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Instalar dependencias
+      run: |
+        pip install requests
+
+    - name: Ejecutar script de canales
+      run: python actualizar_lista.py
+
+    - name: Guardar cambios en GitHub
+      run: |
+        git config --global user.name "IPTV Bot"
+        git config --global user.email "bot@iptv.com"
+        git add lista_automatica.m3u8
+        git commit -m "Lista actualizada por el Robot" || exit 0
+        git push
