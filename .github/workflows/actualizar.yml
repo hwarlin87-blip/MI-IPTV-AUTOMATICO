@@ -1,22 +1,32 @@
-name: Mantener Lista Activa
+name: Actualizador de Canales Locales
 
 on:
   schedule:
-    - cron: '0 */6 * * *' # Se ejecuta cada 6 horas para mantener el enlace vivo
-  workflow_dispatch: # Permite activarlo manualmente
+    - cron: '0 */6 * * *' # Corre cada 6 horas solo
+  workflow_dispatch: # Permite darle play manual
 
 jobs:
-  refresh:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Descargar repositorio
+      - name: Clonar el repositorio
         uses: actions/checkout@v4
 
-      - name: Actualizar historial
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-python-version: '3.x'
+
+      - name: Instalar librerías necesarias
+        run: pip install requests
+
+      - name: Ejecutar el Robot Raspador
+        run: python actualizar_lista.py
+
+      - name: Guardar los canales nuevos en GitHub
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          echo "# Actualizado el $(date)" >> README.md
-          git add README.md
-          git commit -m "Refrescando enlace de la lista" || exit 0
+          git add lista.m3u8
+          git commit -m "Robot: Canales locales dominicanos actualizados" || exit 0
           git push
